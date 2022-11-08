@@ -1,9 +1,7 @@
 package ru.digitalhabits.homework3.domain;
 
 import lombok.Data;
-import lombok.RequiredArgsConstructor;
 import lombok.experimental.Accessors;
-import ru.digitalhabits.homework3.model.PersonShortResponse;
 
 import javax.persistence.*;
 import java.util.List;
@@ -24,6 +22,6 @@ public class Department {
     @Column(name = "closed")
     private boolean closed;
 
-    @Column(name = "persons")
-    private List<PersonShortResponse> persons;
+    @OneToMany(mappedBy = "department")
+    private List<Person> persons;
 }

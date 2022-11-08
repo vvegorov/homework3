@@ -1,14 +1,16 @@
 package ru.digitalhabits.homework3.service;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.commons.lang3.NotImplementedException;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.digitalhabits.homework3.dao.DepartmentDaoImpl;
+import ru.digitalhabits.homework3.dao.PersonDaoImpl;
 import ru.digitalhabits.homework3.domain.Department;
 import ru.digitalhabits.homework3.model.DepartmentFullResponse;
 import ru.digitalhabits.homework3.model.DepartmentRequest;
 import ru.digitalhabits.homework3.model.DepartmentShortResponse;
+import ru.digitalhabits.homework3.model.PersonShortResponse;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -16,15 +18,11 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class DepartmentServiceImpl
         implements DepartmentService {
-    private DepartmentDaoImpl departmentDao;
-
-    @Autowired
-    public DepartmentServiceImpl(DepartmentDaoImpl departmentDao) {
-        this.departmentDao = departmentDao;
-    }
-
+    private final DepartmentDaoImpl departmentDao;
+    private final PersonDaoImpl personDao;
 
     @Nonnull
     @Override
@@ -46,7 +44,12 @@ public class DepartmentServiceImpl
         // TODO: NotImplemented: получение подробной информации о департаменте и краткой информации о людях в нем.
         //  Если не найдено, отдавать 404:NotFound
         Department dep = departmentDao.findById(id);
-        DepartmentFullResponse departmentFullResponse = new DepartmentFullResponse().setId(dep.getId()).setName(dep.getName()).setClosed(dep.isClosed()).setPersons(dep.getPersons());
+        List<PersonShortResponse> personShortResponseList = dep.getPersons()
+                .stream()
+                .map(person -> new PersonShortResponse().setId(person.getId()).setFullName(person.getName()))
+                .collect(Collectors.toList());
+
+        DepartmentFullResponse departmentFullResponse = new DepartmentFullResponse().setId(dep.getId()).setName(dep.getName()).setClosed(dep.isClosed()).setPersons(personShortResponseList);
         return departmentFullResponse;
 
 //        throw new NotImplementedException();
@@ -74,7 +77,12 @@ public class DepartmentServiceImpl
         dep.setName(request.getName());
         departmentDao.update(dep);
 
-        DepartmentFullResponse departmentFullResponse = new DepartmentFullResponse().setId(dep.getId()).setName(dep.getName()).setClosed(dep.isClosed()).setPersons(dep.getPersons());
+        List<PersonShortResponse> personShortResponseList = dep.getPersons()
+                .stream()
+                .map(person -> new PersonShortResponse().setId(person.getId()).setFullName(person.getName()))
+                .collect(Collectors.toList());
+
+        DepartmentFullResponse departmentFullResponse = new DepartmentFullResponse().setId(dep.getId()).setName(dep.getName()).setClosed(dep.isClosed()).setPersons(personShortResponseList);
         return departmentFullResponse;
 
 //        throw new NotImplementedException();

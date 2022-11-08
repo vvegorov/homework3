@@ -1,14 +1,17 @@
 package ru.digitalhabits.homework3.dao;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 import ru.digitalhabits.homework3.domain.Person;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import javax.persistence.EntityManager;
+import javax.persistence.EntityNotFoundException;
 import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
 import java.util.List;
+import java.util.Optional;
 
 @Repository
 public class PersonDaoImpl
@@ -17,31 +20,52 @@ public class PersonDaoImpl
     @PersistenceContext
     private EntityManager entityManager;
 
+    @Transactional
+    public Person save(Person person) {
+        entityManager.persist(person);
+        return person;
+    }
+
     @Nullable
     @Override
     public Person findById(@Nonnull Integer id) {
         // TODO: NotImplemented
-        throw new NotImplementedException();
+
+        Person person = Optional.ofNullable((Person) entityManager.find(Person.class, id)).orElseThrow(
+                EntityNotFoundException::new);
+        return person;
+//        throw new NotImplementedException();
     }
 
     @Nonnull
     @Override
     public List<Person> findAll() {
+        TypedQuery<Person> query = entityManager.createQuery("SELECT p FROM person p", Person.class);
+        return query.getResultList();
         // TODO: NotImplemented
-        throw new NotImplementedException();
+//        throw new NotImplementedException();
     }
 
     @Nonnull
     @Override
     public Person update(@Nonnull Person person) {
         // TODO: NotImplemented
-        throw new NotImplementedException();
+        entityManager.merge(person);
+        return person;
+//        throw new NotImplementedException();
     }
 
     @Nullable
     @Override
     public Person delete(@Nonnull Integer id) {
         // TODO: NotImplemented
-        throw new NotImplementedException();
+
+        Person person = findById(id);
+        if (person != null) {
+            entityManager.remove(person);
+        }
+
+        return person;
+//        throw new NotImplementedException();
     }
 }
