@@ -30,7 +30,6 @@ public class PersonDaoImpl
     @Override
     public Person findById(@Nonnull Integer id) {
         // TODO: NotImplemented
-
         return Optional.ofNullable(entityManager.find(Person.class, id)).orElseThrow(
                 EntityNotFoundException::new);
     }
