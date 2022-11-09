@@ -1,6 +1,5 @@
 package ru.digitalhabits.homework3.dao;
 
-import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Repository;
 import org.springframework.transaction.annotation.Transactional;
 import ru.digitalhabits.homework3.domain.Department;
@@ -33,9 +32,8 @@ public class DepartmentDaoImpl
     public Department findById(@Nonnull Integer id) {
         // TODO: NotImplemented
 
-        Department department = Optional.ofNullable((Department) entityManager.find(Department.class, id)).orElseThrow(
+        return Optional.ofNullable(entityManager.find(Department.class, id)).orElseThrow(
                 EntityNotFoundException::new);
-        return department;
 //        throw new NotImplementedException();
     }
 

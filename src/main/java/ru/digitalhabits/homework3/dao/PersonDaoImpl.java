@@ -31,10 +31,8 @@ public class PersonDaoImpl
     public Person findById(@Nonnull Integer id) {
         // TODO: NotImplemented
 
-        Person person = Optional.ofNullable((Person) entityManager.find(Person.class, id)).orElseThrow(
+        return Optional.ofNullable(entityManager.find(Person.class, id)).orElseThrow(
                 EntityNotFoundException::new);
-        return person;
-//        throw new NotImplementedException();
     }
 
     @Nonnull
@@ -42,8 +40,6 @@ public class PersonDaoImpl
     public List<Person> findAll() {
         TypedQuery<Person> query = entityManager.createQuery("SELECT p FROM person p", Person.class);
         return query.getResultList();
-        // TODO: NotImplemented
-//        throw new NotImplementedException();
     }
 
     @Nonnull
@@ -52,20 +48,16 @@ public class PersonDaoImpl
         // TODO: NotImplemented
         entityManager.merge(person);
         return person;
-//        throw new NotImplementedException();
     }
 
     @Nullable
     @Override
     public Person delete(@Nonnull Integer id) {
         // TODO: NotImplemented
-
         Person person = findById(id);
         if (person != null) {
             entityManager.remove(person);
         }
-
         return person;
-//        throw new NotImplementedException();
     }
 }

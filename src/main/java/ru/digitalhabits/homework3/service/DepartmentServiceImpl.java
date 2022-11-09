@@ -1,19 +1,20 @@
 package ru.digitalhabits.homework3.service;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.digitalhabits.homework3.dao.DepartmentDaoImpl;
-import ru.digitalhabits.homework3.dao.PersonDaoImpl;
 import ru.digitalhabits.homework3.domain.Department;
+import ru.digitalhabits.homework3.domain.Person;
 import ru.digitalhabits.homework3.model.DepartmentFullResponse;
 import ru.digitalhabits.homework3.model.DepartmentRequest;
 import ru.digitalhabits.homework3.model.DepartmentShortResponse;
 import ru.digitalhabits.homework3.model.PersonShortResponse;
 
 import javax.annotation.Nonnull;
+import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -22,7 +23,6 @@ import java.util.stream.Collectors;
 public class DepartmentServiceImpl
         implements DepartmentService {
     private final DepartmentDaoImpl departmentDao;
-    private final PersonDaoImpl personDao;
 
     @Nonnull
     @Override
@@ -33,8 +33,6 @@ public class DepartmentServiceImpl
                 .stream()
                 .map(department -> new DepartmentShortResponse().setId(department.getId()).setName(department.getName()))
                 .collect(Collectors.toList());
-
-//        throw new NotImplementedException();
     }
 
     @Nonnull
@@ -49,10 +47,7 @@ public class DepartmentServiceImpl
                 .map(person -> new PersonShortResponse().setId(person.getId()).setFullName(person.getName()))
                 .collect(Collectors.toList());
 
-        DepartmentFullResponse departmentFullResponse = new DepartmentFullResponse().setId(dep.getId()).setName(dep.getName()).setClosed(dep.isClosed()).setPersons(personShortResponseList);
-        return departmentFullResponse;
-
-//        throw new NotImplementedException();
+        return new DepartmentFullResponse().setId(dep.getId()).setName(dep.getName()).setClosed(dep.isClosed()).setPersons(personShortResponseList);
     }
 
     @Override
@@ -63,7 +58,6 @@ public class DepartmentServiceImpl
         Department dep = new Department().setId(id).setName(request.getName()).setClosed(false).setPersons(null);
         departmentDao.save(dep);
         return id;
-//        throw new NotImplementedException();
     }
 
     @Nonnull
@@ -84,8 +78,6 @@ public class DepartmentServiceImpl
 
         DepartmentFullResponse departmentFullResponse = new DepartmentFullResponse().setId(dep.getId()).setName(dep.getName()).setClosed(dep.isClosed()).setPersons(personShortResponseList);
         return departmentFullResponse;
-
-//        throw new NotImplementedException();
     }
 
     @Override
@@ -93,7 +85,14 @@ public class DepartmentServiceImpl
     public void delete(int id) {
         // TODO: NotImplemented: удаление всех людей из департамента и удаление самого департамента.
         //  Если не найдено, то ничего не делать
-        throw new NotImplementedException();
+
+        Department dep = departmentDao.findById(id);
+        List<Person> personList = Optional.ofNullable(dep.getPersons()).orElse(Collections.EMPTY_LIST);
+        if (!personList.isEmpty()) {
+            dep.setPersons(null);
+            departmentDao.save(dep);
+            departmentDao.delete(id);
+        }
     }
 
     @Override
@@ -101,6 +100,12 @@ public class DepartmentServiceImpl
     public void close(int id) {
         // TODO: NotImplemented: удаление всех людей из департамента и установка отметки на департаменте,
         //  что он закрыт для добавления новых людей. Если не найдено, отдавать 404:NotFound
-        throw new NotImplementedException();
+        Department dep = departmentDao.findById(id);
+        List<Person> personList = Optional.ofNullable(dep.getPersons()).orElse(Collections.EMPTY_LIST);
+        if (!personList.isEmpty()) {
+            dep.setPersons(null);
+            dep.setClosed(true);
+            departmentDao.save(dep);
+        }
     }
 }

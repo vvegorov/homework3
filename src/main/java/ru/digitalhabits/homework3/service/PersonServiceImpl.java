@@ -1,7 +1,6 @@
 package ru.digitalhabits.homework3.service;
 
 import lombok.RequiredArgsConstructor;
-import org.apache.commons.lang3.NotImplementedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.digitalhabits.homework3.dao.DepartmentDaoImpl;
@@ -14,8 +13,7 @@ import ru.digitalhabits.homework3.model.PersonRequest;
 import ru.digitalhabits.homework3.model.PersonShortResponse;
 
 import javax.annotation.Nonnull;
-import java.util.List;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -36,7 +34,6 @@ public class PersonServiceImpl
                 .stream()
                 .map(person -> new PersonShortResponse().setId(person.getId()).setFullName(person.getName()))
                 .collect(Collectors.toList());
-//        throw new NotImplementedException();
     }
 
     @Nonnull
@@ -45,9 +42,7 @@ public class PersonServiceImpl
     public PersonFullResponse getById(int id) {
         // TODO: NotImplemented: получение информации о человеке. Если не найдено, отдавать 404:NotFound
         Person person = personDao.findById(id);
-        PersonFullResponse personFullResponse = new PersonFullResponse().setId(id).setFullName(person.getName()).setAge(person.getAge()).setDepartment(person.getDepartment());
-        return personFullResponse;
-//        throw new NotImplementedException();
+        return new PersonFullResponse().setId(id).setFullName(Objects.requireNonNull(person).getName()).setAge(person.getAge()).setDepartment(person.getDepartment());
     }
 
     @Override
@@ -56,18 +51,10 @@ public class PersonServiceImpl
         // TODO: NotImplemented: создание новой записи о человеке
         int id = Integer.parseInt(UUID.randomUUID().toString());
         String fullName = request.getFirstName() + request.getMiddleName() + request.getLastName();
-        Department department = departmentDao.findAll()
-                .stream()
-                .filter(d -> d.getPersons().size() > 2)
-                .findFirst()
-                .get();
 
-        DepartmentShortResponse departmentShortResponse = new DepartmentShortResponse().setId(department.getId()).setName(department.getName());
-
-        Person person = new Person().setId(id).setName(fullName).setAge(request.getAge()).setDepartment(departmentShortResponse);
+        Person person = new Person().setId(id).setName(fullName).setAge(request.getAge()).setDepartment(null);
         personDao.save(person);
         return id;
-//        throw new NotImplementedException();
     }
 
     @Nonnull
@@ -77,21 +64,18 @@ public class PersonServiceImpl
         // TODO: NotImplemented: обновление информации о человеке. Если не найдено, отдавать 404:NotFound
         Person person = personDao.findById(id);
         String fullName = request.getFirstName() + request.getMiddleName() + request.getLastName();
-        person.setName(fullName);
+        Objects.requireNonNull(person).setName(fullName);
         person.setAge(request.getAge());
         personDao.update(person);
 
-        PersonFullResponse personFullResponse = new PersonFullResponse().setId(person.getId()).setFullName(fullName).setAge(request.getAge()).setDepartment(person.getDepartment());
-        return personFullResponse;
-
-//        throw new NotImplementedException();
+        return new PersonFullResponse().setId(person.getId()).setFullName(fullName).setAge(request.getAge()).setDepartment(person.getDepartment());
     }
 
     @Override
     @Transactional
     public void delete(int id) {
         // TODO: NotImplemented: удаление информации о человеке и удаление его из отдела. Если не найдено, ничего не делать
-        throw new NotImplementedException();
+        personDao.delete(id);
     }
 
 
@@ -101,7 +85,18 @@ public class PersonServiceImpl
         // TODO: NotImplemented: добавление нового человека в департамент.
         //  Если не найден человек или департамент, отдавать 404:NotFound.
         //  Если департамент закрыт, то отдавать 409:Conflict
-        throw new NotImplementedException();
+        Person person = personDao.findById(personId);
+        Department dep = departmentDao.findById(departmentId);
+        if (dep.isClosed()) {
+            throw new IllegalStateException();
+        }
+        List<Person> personList = Optional.ofNullable(dep.getPersons()).orElse(new ArrayList<Person>());
+        personList.add(person);
+        dep.setPersons(personList);
+        departmentDao.save(dep);
+        DepartmentShortResponse departmentShortResponse = new DepartmentShortResponse().setId(dep.getId()).setName(dep.getName());
+        person.setDepartment(departmentShortResponse);
+        personDao.save(person);
     }
 
     @Override
@@ -109,6 +104,13 @@ public class PersonServiceImpl
     public void removePersonFromDepartment(int departmentId, int personId) {
         // TODO: NotImplemented: удаление человека из департамента.
         //  Если департамент не найден, отдавать 404:NotFound, если не найден человек в департаменте, то ничего не делать
-        throw new NotImplementedException();
+        Person person = personDao.findById(personId);
+        Department dep = departmentDao.findById(departmentId);
+        List personList = Optional.ofNullable(Objects.requireNonNull(dep).getPersons()).orElse(Collections.EMPTY_LIST);
+        if (!personList.isEmpty()) {
+            personList.remove(person);
+            dep.setPersons(personList);
+            departmentDao.save(dep);
+        }
     }
 }
