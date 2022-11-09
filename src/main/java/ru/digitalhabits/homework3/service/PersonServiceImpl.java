@@ -7,7 +7,6 @@ import ru.digitalhabits.homework3.dao.DepartmentDaoImpl;
 import ru.digitalhabits.homework3.dao.PersonDaoImpl;
 import ru.digitalhabits.homework3.domain.Department;
 import ru.digitalhabits.homework3.domain.Person;
-import ru.digitalhabits.homework3.model.DepartmentShortResponse;
 import ru.digitalhabits.homework3.model.PersonFullResponse;
 import ru.digitalhabits.homework3.model.PersonRequest;
 import ru.digitalhabits.homework3.model.PersonShortResponse;
@@ -42,7 +41,7 @@ public class PersonServiceImpl
     public PersonFullResponse getById(int id) {
         // TODO: NotImplemented: получение информации о человеке. Если не найдено, отдавать 404:NotFound
         Person person = personDao.findById(id);
-        return new PersonFullResponse().setId(id).setFullName(Objects.requireNonNull(person).getName()).setAge(person.getAge()).setDepartment(person.getDepartment());
+        return new PersonFullResponse().setId(id).setFullName(Objects.requireNonNull(person).getName()).setAge(person.getAge()).setDepartment(null);
     }
 
     @Override
@@ -68,14 +67,20 @@ public class PersonServiceImpl
         person.setAge(request.getAge());
         personDao.update(person);
 
-        return new PersonFullResponse().setId(person.getId()).setFullName(fullName).setAge(request.getAge()).setDepartment(person.getDepartment());
+        return new PersonFullResponse().setId(person.getId()).setFullName(fullName).setAge(request.getAge()).setDepartment(null);
     }
 
     @Override
     @Transactional
     public void delete(int id) {
         // TODO: NotImplemented: удаление информации о человеке и удаление его из отдела. Если не найдено, ничего не делать
-        personDao.delete(id);
+        Person person = personDao.findById(id);
+        if (!person.getDepartment().getName().isEmpty()) {
+            Department dep = departmentDao.findById(person.getDepartment().getId());
+            dep.getPersons().remove(id);
+            departmentDao.save(dep);
+            personDao.delete(id);
+        }
     }
 
 
@@ -94,8 +99,8 @@ public class PersonServiceImpl
         personList.add(person);
         dep.setPersons(personList);
         departmentDao.save(dep);
-        DepartmentShortResponse departmentShortResponse = new DepartmentShortResponse().setId(dep.getId()).setName(dep.getName());
-        person.setDepartment(departmentShortResponse);
+//        DepartmentShortResponse departmentShortResponse = new DepartmentShortResponse().setId(dep.getId()).setName(dep.getName());
+        person.setDepartment(dep);
         personDao.save(person);
     }
 
