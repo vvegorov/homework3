@@ -20,12 +20,9 @@ public class Person {
     private String name;
     @Column(name = "age")
     private Integer age;
-    //    @Column(name = "department")
-//    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+
     @ManyToOne
     @JoinColumn(name = "department_id")
-//    @OnDelete(action = OnDeleteAction.CASCADE)
-//    @JsonIgnore
     private Department department;
 
     public Person(String name, Integer age, Department department) {
