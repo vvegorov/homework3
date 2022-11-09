@@ -8,7 +8,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import ru.digitalhabits.homework3.domain.Department;
 
 import java.util.List;
-import java.util.UUID;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -26,7 +25,7 @@ class DepartmentDaoTest {
     @Before("")
     public void setUp(){
         // given
-        id = Integer.parseInt(UUID.randomUUID().toString());
+        id = 23;
         Department dep = new Department().setId(id).setName("test1").setClosed(false).setPersons(null);
 
         entityManager.persist(dep);
