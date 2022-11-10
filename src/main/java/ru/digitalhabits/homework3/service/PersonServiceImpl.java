@@ -7,6 +7,7 @@ import ru.digitalhabits.homework3.dao.DepartmentDaoImpl;
 import ru.digitalhabits.homework3.dao.PersonDaoImpl;
 import ru.digitalhabits.homework3.domain.Department;
 import ru.digitalhabits.homework3.domain.Person;
+import ru.digitalhabits.homework3.model.DepartmentShortResponse;
 import ru.digitalhabits.homework3.model.PersonFullResponse;
 import ru.digitalhabits.homework3.model.PersonRequest;
 import ru.digitalhabits.homework3.model.PersonShortResponse;
@@ -41,19 +42,20 @@ public class PersonServiceImpl
     public PersonFullResponse getById(int id) {
         // TODO: NotImplemented: получение информации о человеке. Если не найдено, отдавать 404:NotFound
         Person person = personDao.findById(id);
-        return new PersonFullResponse().setId(id).setFullName(Objects.requireNonNull(person).getName()).setAge(person.getAge()).setDepartment(null);
+        DepartmentShortResponse departmentShortResponse = Optional.ofNullable(person.getDepartment()).map(p -> new DepartmentShortResponse().setId(p.getId()).setName(p.getName())).orElseGet(DepartmentShortResponse::new);
+
+        return new PersonFullResponse().setId(id).setFullName(Objects.requireNonNull(person).getName()).setAge(person.getAge()).setDepartment(departmentShortResponse);
     }
 
     @Override
     @Transactional
     public int create(@Nonnull PersonRequest request) {
         // TODO: NotImplemented: создание новой записи о человеке
-        int id = (int) (System.currentTimeMillis() & 0xfffffff);
         String fullName = request.getFirstName() + request.getMiddleName() + request.getLastName();
 
-        Person person = new Person().setId(id).setName(fullName).setAge(request.getAge()).setDepartment(null);
+        Person person = new Person().setName(fullName).setAge(request.getAge()).setDepartment(null);
         personDao.save(person);
-        return id;
+        return person.getId();
     }
 
     @Nonnull
@@ -62,12 +64,13 @@ public class PersonServiceImpl
     public PersonFullResponse update(int id, @Nonnull PersonRequest request) {
         // TODO: NotImplemented: обновление информации о человеке. Если не найдено, отдавать 404:NotFound
         Person person = personDao.findById(id);
-        String fullName = request.getFirstName() + request.getMiddleName() + request.getLastName();
+        String fullName = request.getFirstName() + " " + request.getMiddleName() + " " + request.getLastName();
         Objects.requireNonNull(person).setName(fullName);
         person.setAge(request.getAge());
         personDao.update(person);
+        DepartmentShortResponse departmentShortResponse = Optional.ofNullable(person.getDepartment()).map(p -> new DepartmentShortResponse().setId(p.getId()).setName(p.getName())).orElseGet(DepartmentShortResponse::new);
 
-        return new PersonFullResponse().setId(person.getId()).setFullName(fullName).setAge(request.getAge()).setDepartment(null);
+        return new PersonFullResponse().setId(person.getId()).setFullName(fullName).setAge(request.getAge()).setDepartment(departmentShortResponse);
     }
 
     @Override
@@ -96,12 +99,14 @@ public class PersonServiceImpl
             throw new IllegalStateException();
         }
         List<Person> personList = Optional.ofNullable(dep.getPersons()).orElse(new ArrayList<Person>());
-        personList.add(person);
-        dep.setPersons(personList);
-        departmentDao.save(dep);
-//        DepartmentShortResponse departmentShortResponse = new DepartmentShortResponse().setId(dep.getId()).setName(dep.getName());
-        person.setDepartment(dep);
-        personDao.save(person);
+
+        if (!personList.contains(person)) {
+            personList.add(person);
+            dep.setPersons(personList);
+//            departmentDao.save(dep);
+            person.setDepartment(dep);
+            personDao.save(person);
+        }
     }
 
     @Override
@@ -115,7 +120,6 @@ public class PersonServiceImpl
         if (!personList.isEmpty()) {
             personList.remove(person);
             dep.setPersons(personList);
-            departmentDao.save(dep);
         }
     }
 }

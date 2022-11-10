@@ -37,7 +37,7 @@ public class PersonDaoImpl
     @Nonnull
     @Override
     public List<Person> findAll() {
-        TypedQuery<Person> query = entityManager.createQuery("SELECT p FROM person p", Person.class);
+        TypedQuery<Person> query = entityManager.createQuery("SELECT p FROM Person p", Person.class);
         return query.getResultList();
     }
 

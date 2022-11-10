@@ -1,6 +1,7 @@
 package ru.digitalhabits.homework3.domain;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 import lombok.experimental.Accessors;
 
 import javax.persistence.*;
@@ -10,6 +11,7 @@ import java.util.List;
 @Accessors(chain = true)
 @Entity
 @Table(name = "department")
+@NoArgsConstructor
 public class Department {
 
     @Id

@@ -41,9 +41,8 @@ public class DepartmentDaoImpl
     @Override
     public List<Department> findAll() {
         // TODO: NotImplemented
-        TypedQuery<Department> query = entityManager.createQuery("SELECT t FROM department t", Department.class);
+        TypedQuery<Department> query = entityManager.createQuery("SELECT t FROM Department t", Department.class);
         return query.getResultList();
-//        throw new NotImplementedException();
     }
 
     @Nonnull

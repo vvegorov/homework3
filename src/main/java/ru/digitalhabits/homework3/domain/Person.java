@@ -16,18 +16,14 @@ public class Person {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
-    @Column(name = "fullName")
-    private String name;
+
     @Column(name = "age")
     private Integer age;
+
+    @Column(name = "fullName")
+    private String name;
 
     @ManyToOne
     @JoinColumn(name = "department_id")
     private Department department;
-
-    public Person(String name, Integer age, Department department) {
-        this.name = name;
-        this.age = age;
-        this.department = department;
-    }
 }

@@ -12,6 +12,7 @@ import ru.digitalhabits.homework3.model.DepartmentShortResponse;
 import ru.digitalhabits.homework3.model.PersonShortResponse;
 
 import javax.annotation.Nonnull;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -41,11 +42,11 @@ public class DepartmentServiceImpl
         // TODO: NotImplemented: получение подробной информации о департаменте и краткой информации о людях в нем.
         //  Если не найдено, отдавать 404:NotFound
         Department dep = departmentDao.findById(id);
-        List<PersonShortResponse> personShortResponseList = dep.getPersons()
-                .stream()
-                .map(person -> new PersonShortResponse().setId(person.getId()).setFullName(person.getName()))
-                .collect(Collectors.toList());
 
+        List<PersonShortResponse> personShortResponseList = Optional.ofNullable(dep.getPersons())
+                .map(k -> k.stream().map(h -> new PersonShortResponse().setId(h.getId()).setFullName(h.getName())).collect(Collectors.toList()))
+                .orElseGet(ArrayList<PersonShortResponse>::new);
+//
         return new DepartmentFullResponse().setId(dep.getId()).setName(dep.getName()).setClosed(dep.isClosed()).setPersons(personShortResponseList);
     }
 
@@ -53,10 +54,9 @@ public class DepartmentServiceImpl
     @Transactional
     public int create(@Nonnull DepartmentRequest request) {
         // TODO: NotImplemented: создание нового департамента
-        int id = (int) (System.currentTimeMillis() & 0xfffffff);
-        Department dep = new Department().setId(id).setName(request.getName()).setClosed(false).setPersons(null);
+        Department dep = new Department().setName(request.getName()).setClosed(false).setPersons(null);
         departmentDao.save(dep);
-        return id;
+        return dep.getId();
     }
 
     @Nonnull
@@ -70,10 +70,9 @@ public class DepartmentServiceImpl
         dep.setName(request.getName());
         departmentDao.update(dep);
 
-        List<PersonShortResponse> personShortResponseList = dep.getPersons()
-                .stream()
-                .map(person -> new PersonShortResponse().setId(person.getId()).setFullName(person.getName()))
-                .collect(Collectors.toList());
+        List<PersonShortResponse> personShortResponseList = Optional.ofNullable(dep.getPersons())
+                .map(k -> k.stream().map(h -> new PersonShortResponse().setId(h.getId()).setFullName(h.getName())).collect(Collectors.toList()))
+                .orElseGet(ArrayList<PersonShortResponse>::new);
 
         DepartmentFullResponse departmentFullResponse = new DepartmentFullResponse().setId(dep.getId()).setName(dep.getName()).setClosed(dep.isClosed()).setPersons(personShortResponseList);
         return departmentFullResponse;
