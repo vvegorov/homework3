@@ -15,7 +15,6 @@ import javax.annotation.Nonnull;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -54,7 +53,7 @@ public class DepartmentServiceImpl
     @Transactional
     public int create(@Nonnull DepartmentRequest request) {
         // TODO: NotImplemented: создание нового департамента
-        int id = Integer.parseInt(UUID.randomUUID().toString());
+        int id = (int) (System.currentTimeMillis() & 0xfffffff);
         Department dep = new Department().setId(id).setName(request.getName()).setClosed(false).setPersons(null);
         departmentDao.save(dep);
         return id;

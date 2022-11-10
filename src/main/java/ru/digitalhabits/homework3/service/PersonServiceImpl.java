@@ -48,7 +48,7 @@ public class PersonServiceImpl
     @Transactional
     public int create(@Nonnull PersonRequest request) {
         // TODO: NotImplemented: создание новой записи о человеке
-        int id = Integer.parseInt(UUID.randomUUID().toString());
+        int id = (int) (System.currentTimeMillis() & 0xfffffff);
         String fullName = request.getFirstName() + request.getMiddleName() + request.getLastName();
 
         Person person = new Person().setId(id).setName(fullName).setAge(request.getAge()).setDepartment(null);
